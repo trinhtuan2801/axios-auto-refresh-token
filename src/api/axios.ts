@@ -27,12 +27,16 @@ apiPrivate.interceptors.request.use(
   },
 );
 
+interface CustomAxiosError extends AxiosError {
+  config: AxiosError['config'] & { triedRenewToken: boolean };
+}
+
 apiPrivate.interceptors.response.use(
   (response) => {
     return response.data;
   },
-  async (error: AxiosError) => {
-    const prevConfig = error.config as any;
+  async (error: CustomAxiosError) => {
+    const prevConfig = error.config;
     if (error.response?.status === 401 && !prevConfig.triedRenewToken) {
       prevConfig.triedRenewToken = true;
       try {
